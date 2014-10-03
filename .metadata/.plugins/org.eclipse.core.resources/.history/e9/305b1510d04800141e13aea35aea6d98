@@ -1,0 +1,46 @@
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
+
+import javax.imageio.ImageIO;
+
+public class ImageParser {
+	public static final String imageFolder = "/ProbabilityImages";
+	public ImageParser(){
+		
+	}
+	public void loadAndParseImages(){
+		URL resource = ImageParser.class
+			      .getResource(imageFolder);
+		File folder;
+		try {
+		  folder = new File(resource.toURI());
+		} catch(URISyntaxException e) {
+		  folder = new File(resource.getPath());
+		}
+		for(final File imageFile: folder.listFiles()){
+			parseImage(imageFile);
+		}
+	}
+	
+	public void parseImage(File f){
+		String filename = f.getName();
+		System.out.println(filename);
+		BufferedImage img = null;
+		try {
+		    img = ImageIO.read(f);
+		} catch (IOException e) {
+		}
+		
+		
+	}
+	
+	
+	public static void main(String[] args){
+		ImageParser parser = new ImageParser();
+		parser.loadAndParseImages();
+	}
+}

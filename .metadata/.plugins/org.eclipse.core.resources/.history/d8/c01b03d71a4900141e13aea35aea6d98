@@ -1,0 +1,94 @@
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
+
+import javax.imageio.ImageIO;
+
+/**
+ * Analyzes NFL game probability data. Loads a probability curve
+ * such as http://live.advancednflstats.com/index.php?gameid1=2014092500
+ * Parses bit data of the image to compute the integral of the curve
+ * @author Davis Treybig
+ *
+ */
+public class ImageParser {
+	public static final String imageFolder = "/ProbabilityImages";
+	public ImageParser(){	
+	}
+	
+	/**
+	 * Loads every image in the designated images folder. Parses each
+	 * to compute a probability integral for each image
+	 */
+	public void loadAndParseImages(){
+		URL resource = ImageParser.class
+			      .getResource(imageFolder);
+		File folder;
+		try {
+		  folder = new File(resource.toURI());
+		} catch(URISyntaxException e) {
+		  folder = new File(resource.getPath());
+		}
+		for(final File imageFile: folder.listFiles()){
+			parseImage(imageFile);
+		}
+	}
+	
+	public void parseImage(File f){
+		String filename = f.getName();
+		System.out.println(filename);
+		
+		BufferedImage img = null;
+		try {
+		    img = ImageIO.read(f);
+		} catch (IOException e) {
+		}
+		
+		int[][] pixels = getPixels(img);
+		
+		//Represent the percentile height where the yellow pixel is
+		int[] yValues = new int[img.getWidth()];
+		
+		//Move pixel by pixel to the right. Use max height value
+		//because that is the "bottom" of the image
+		for(int i=0; i<img.getWidth(); i++){
+			for(int j=0; j<img.getHeight(); j++){
+				int currentPixel = pixels[i][img.getHeight()-1-j];
+				int  red = (currentPixel & 0x00ff0000) >> 16;
+				int  green = (currentPixel & 0x0000ff00) >> 8;
+				int  blue = currentPixel & 0x000000ff;
+				
+				//The yellow color is R=248 G=255 B=0. We use ranges
+				//to account for small variances in color
+				if(red>240 && green>240 && blue<10){
+					System.out.println("Pixel Found at row:"+i);
+					yValues[i] = j;
+					break;
+				}
+			}	
+		}
+		
+		
+	}
+	/**
+	 * Populates a grid of pixels from a buffered image
+	 */
+	public int[][] getPixels(BufferedImage img){
+		int[][] pixels = new int[img.getWidth()][img.getHeight()];
+		for( int i = 0; i < img.getWidth(); i++ ){
+		    for( int j = 0; j < img.getHeight(); j++ ){
+		        pixels[i][j] = img.getRGB( i, j );
+		    }
+		}
+		return pixels;
+	}
+	
+	public static void main(String[] args){
+		ImageParser parser = new ImageParser();
+		parser.loadAndParseImages();
+	}
+}

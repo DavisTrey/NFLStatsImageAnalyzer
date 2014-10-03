@@ -1,0 +1,36 @@
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
+public class ImageParser {
+	public static final String imageFolder = "./ProabilityImages";
+	public ImageParser(){
+		
+	}
+	public void loadAndParseImages(){
+		final File folder = new File(imageFolder);
+		for(final File imageFile: folder.listFiles()){
+			parseImage(imageFile);
+		}
+	}
+	
+	public void parseImage(File f){
+		String filename = f.getName();
+		System.out.println(filename);
+		BufferedImage img = null;
+		try {
+		    img = ImageIO.read(f);
+		} catch (IOException e) {
+		}
+		
+		
+	}
+	
+	
+	public static void main(String[] args){
+		ImageParser parser = new ImageParser();
+		parser.loadAndParseImages();
+	}
+}
